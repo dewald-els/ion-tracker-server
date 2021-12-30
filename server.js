@@ -1,26 +1,24 @@
-const express = require("express")
-const { unsplashRandomPhoto } = require("./unsplash")
-const app = express()
-const cors = require("cors")
-const { PORT = 3000 } = process.env
 if (process.env.NODE_ENV !== "production") {
 	require("dotenv").config()
 }
+const { unsplashRandomPhoto } = require("./unsplash")
+const { PORT = 3000 } = process.env
 
-app.use(express.json())
-app.use(
-	cors({
-		origin: "http://localhost:8100"
-	})
-)
+const jsonServer = require('json-server')
+const server = jsonServer.create()
 
-app.get("/unsplash/random", async (req, res) => {
+server.get("/unsplash/random", async (req, res) => {
 	const image = await unsplashRandomPhoto()
 	return res.status(200).json({
 		image
 	})
 })
+const router = jsonServer.router('db.json')
+const middlewares = jsonServer.defaults()
 
-app.listen(PORT, () => {
+server.use(middlewares)
+server.use(router)
+
+server.listen(PORT, () => {
 	console.log(`Running on port ${PORT}`)
 })
